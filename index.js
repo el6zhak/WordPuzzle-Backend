@@ -5,8 +5,16 @@ import cors from "cors";
 
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://esx-word-puzzle.vercel.app"
+  ],
+  methods: ["GET", "POST"],
+  credentials: true,
+}));
 app.use(express.json());
+
 
 
 
