@@ -1,6 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
-import Word from "../models/word.js";
+import Word from "./models/word.js";
 import cors from "cors";
 
 
