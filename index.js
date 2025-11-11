@@ -103,12 +103,18 @@ app.post("/api/user", async (req, res) => {
     if (!user){
       user = await User.create({username, userId: uuidv4()});
     }
+    let uscore = await Score.findOne({userId: user.userId});
+    if (!uscore){
+      await Score.create({userId: user.userId, score: 0});
+    }
+    console.log(`User logged in: ${username} (ID: ${user.userId}) (Score initialized: ${uscore ? uscore.score : 0})`);
     res.json({userId: user.userId, username: user.username});
   } catch(err){
     console.error("User creation error:", err);
     res.status(500).json({error: "Server error"});
   }
 }); 
+
 
 app.post("/api/user/score", async (req, res) => {
   const { userId, score } = req.body;
@@ -135,6 +141,24 @@ app.post("/api/user/score", async (req, res) => {
   } catch (err) {
     console.error("Score recording error:", err);
     res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.get("/api/user/:userId/score", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    console.log("Fetching score for user:", userId);
+
+    const userScore = await Score.findOne({ userId }).sort({ createdAt: -1 }); // latest score
+
+    if (!userScore) {
+      return res.json({ score: 0 });
+    }
+
+    res.json({ score: userScore.score });
+  } catch (error) {
+    console.error("Error fetching score:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
