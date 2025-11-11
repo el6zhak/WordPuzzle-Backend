@@ -162,6 +162,38 @@ app.get("/api/user/:userId/score", async (req, res) => {
   }
 });
 
+// Get leaderboard
+app.get("/api/leaderboard", async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    
+    const leaderboard = await Score.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "userId", 
+          as: "user"
+        }
+      },
+      { $unwind: "$user" },
+      { $sort: { score: -1 } },
+      { $limit: limit },
+      {
+        $project: {
+          _id: 0,
+          username: "$user.username",
+          score: 1
+        }
+      }
+    ]);
+
+    res.json(leaderboard);
+  } catch (err) {
+    console.error("Leaderboard error:", err);
+    res.status(500).json({ error: "Failed to fetch leaderboard" });
+  }
+});
 
 // ✅ Start server
 app.listen(3000, () => {
